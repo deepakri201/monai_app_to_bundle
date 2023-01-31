@@ -297,7 +297,8 @@ inference_dict = {
     "output_dir": "$@bundle_root + '/eval'",
     "dataset_dir": "",
     "datalist": "$list(sorted(glob.glob(@dataset_dir + '/imagesTs/*.nii.gz')))",
-    "device": "$torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')",
+    # "device": "$torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')",
+    "device":"$torch.device('cpu')",
     ### I modified the network_def below ### 
     "network_def": { # https://github.com/Project-MONAI/MONAILabel/blob/main/sample-apps/radiology/lib/configs/localization_spine.py
         "_target_": "SegResNet",
@@ -402,6 +403,7 @@ inference_dict = {
            {
                 "_target_": "EnsureTyped", # EnsureTyped(keys="pred", device=torch.device("cpu")), # Use this in case of using GPU smaller than 24GB
                 "keys": "image",
+                "device": "$torch.device('cpu')",
                 # "device": "$torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')"
             },
            {
@@ -469,16 +471,22 @@ inference_dict = {
     ]
 }
 
-config = ConfigParser()
 inference_filename = os.path.join(config_dir, 'inference.json')
-# Set the bundle_root
-config["bundle_root"] = main_dir
-# Set the dataset_dir
-config["dataset_dir"] = data_dir
+inference_dict["bundle_root"] = main_dir 
+inference_dict["dataset_dir"] = data_dir 
+config = ConfigParser()
+config.export_config_file(inference_dict, inference_filename, fmt="json")
 
-config_dict = config.get() 
-inference_json = os.path.join(config_dir, "inference.json")
-config.export_config_file(config_dict, inference_json, fmt="json")
+# config = ConfigParser()
+# inference_filename = os.path.join(config_dir, 'inference.json')
+# # Set the bundle_root
+# config["bundle_root"] = main_dir
+# # Set the dataset_dir
+# config["dataset_dir"] = data_dir
+#
+# config_dict = config.get() 
+# inference_json = os.path.join(config_dir, "inference.json")
+# config.export_config_file(config_dict, inference_json, fmt="json")
 
 # config.export_config_file(inference_dict, inference_filename, fmt="json")
 
